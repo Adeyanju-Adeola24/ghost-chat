@@ -1,0 +1,15 @@
+{
+  "name": "ghost-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Anonymous encrypted P2P chat - Ghost Chat",
+  "scripts": {
+    "build": "npx cap sync android",
+    "cap-add": "npx cap add android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  }
+}

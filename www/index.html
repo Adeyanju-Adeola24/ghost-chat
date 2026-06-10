@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Ghost Chat</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+  <div id="landing">
+    <div class="glitch-container">
+      <h1 class="glitch" data-text="GHOST CHAT">GHOST CHAT</h1>
+    </div>
+    <p class="subtitle">anonymous · encrypted · peer-to-peer</p>
+    <div class="terminal-line">[system] no logs · no追踪 · no identity</div>
+    <div id="room-controls">
+      <input type="text" id="room-input" placeholder="enter room code..." maxlength="10" autocomplete="off">
+      <div class="btn-group">
+        <button id="btn-join" class="btn btn-primary" onclick="joinRoom()">[ join room ]</button>
+        <button id="btn-create" class="btn btn-secondary" onclick="createRoom()">[ create room ]</button>
+      </div>
+      <div id="room-display" class="hidden">
+        <p>your room code:</p>
+        <div id="room-code" class="room-code"></div>
+        <button class="btn btn-small" onclick="copyRoomCode()">[ copy ]</button>
+      </div>
+    </div>
+    <div id="connection-status" class="status hidden">
+      <span class="dot"></span> connecting...
+    </div>
+  </div>
+
+  <div id="chat" class="hidden">
+    <div id="chat-header">
+      <span id="room-label">room: <span id="room-name"></span></span>
+      <span id="peer-count">peers: <span id="peer-count-num">0</span></span>
+      <button class="btn btn-small btn-danger" onclick="leaveRoom()">[ leave ]</button>
+    </div>
+    <div id="messages"></div>
+    <div id="chat-input-area">
+      <input type="text" id="chat-input" placeholder="type your message..." autocomplete="off">
+      <button id="btn-send" onclick="sendMessage()">[ send ]</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
