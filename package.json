@@ -1,8 +1,8 @@
 {
   "name": "ghost-chat",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Anonymous encrypted P2P chat - Ghost Chat",
+  "description": "Anonymous encrypted P2P chat with QR, BLE, and local network discovery",
   "scripts": {
     "build": "npx cap sync android",
     "cap-add": "npx cap add android"
@@ -10,6 +10,7 @@
   "dependencies": {
     "@capacitor/android": "^6.1.2",
     "@capacitor/cli": "^6.1.2",
-    "@capacitor/core": "^6.1.2"
+    "@capacitor/core": "^6.1.2",
+    "@capacitor-community/bluetooth-le": "^6.0.2"
   }
 }

@@ -2,55 +2,155 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Ghost Chat</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-theme="dark">
 
 <div id="app">
   <div id="landing">
-    <div class="glitch-container">
-      <h1 class="glitch" data-text="GHOST CHAT">GHOST CHAT</h1>
-    </div>
+    <div class="glitch-container"><h1 class="glitch" data-text="GHOST CHAT">GHOST CHAT</h1></div>
     <p class="subtitle">anonymous · encrypted · peer-to-peer</p>
-    <div class="terminal-line">[system] no logs · no追踪 · no identity</div>
+    <div class="terminal-line" id="tagline">[system] no logs · no追踪 · no identity</div>
+    <div class="mode-toggle"><button id="theme-btn" onclick="toggleTheme()">[ light mode ]</button></div>
+
     <div id="room-controls">
       <input type="text" id="room-input" placeholder="enter room code..." maxlength="10" autocomplete="off">
+      <div class="input-row"><input type="password" id="room-password" placeholder="room password (optional)" maxlength="20" autocomplete="off"></div>
       <div class="btn-group">
-        <button id="btn-join" class="btn btn-primary" onclick="joinRoom()">[ join room ]</button>
-        <button id="btn-create" class="btn btn-secondary" onclick="createRoom()">[ create room ]</button>
+        <button class="btn btn-primary" onclick="joinRoom()">[ join room ]</button>
+        <button class="btn btn-secondary" onclick="createRoom()">[ create room ]</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="showQrScan()">[ scan qr ]</button>
+        <button class="btn btn-secondary" onclick="showBleScan()">[ ble scan ]</button>
       </div>
       <div id="room-display" class="hidden">
-        <p>your room code:</p>
+        <p id="room-pw-notice" class="hidden" style="font-size:0.7rem;color:var(--red)">password protected</p>
         <div id="room-code" class="room-code"></div>
-        <button class="btn btn-small" onclick="copyRoomCode()">[ copy ]</button>
+        <div id="qr-container" class="hidden"></div>
+        <div class="btn-group"><button class="btn btn-small" onclick="copyRoomCode()">[ copy code ]</button></div>
       </div>
     </div>
-    <div id="connection-status" class="status hidden">
-      <span class="dot"></span> connecting...
+
+    <div id="self-destruct-bar" class="hidden" style="font-size:0.7rem;color:var(--text-dim);display:flex;gap:6px;align-items:center">
+      <label>self-destruct:</label>
+      <select id="destruct-timer" style="background:var(--bg2);color:var(--green);border:1px solid var(--border);font-family:inherit;font-size:0.7rem;padding:4px">
+        <option value="0">off</option><option value="5">5s</option><option value="10">10s</option>
+        <option value="30">30s</option><option value="60">1m</option><option value="300">5m</option>
+      </select>
+    </div>
+
+    <div id="connection-status" class="status hidden"><span class="dot"></span><span>connecting...</span></div>
+    <div id="host-panel" class="hidden" style="font-size:0.7rem;color:var(--text-dim);text-align:center">
+      <button class="btn btn-small" onclick="lockRoom()">[ lock room ]</button>
     </div>
   </div>
 
   <div id="chat" class="hidden">
     <div id="chat-header">
-      <span id="room-label">room: <span id="room-name"></span></span>
-      <span id="peer-count">peers: <span id="peer-count-num">0</span></span>
-      <button class="btn btn-small btn-danger" onclick="leaveRoom()">[ leave ]</button>
+      <div class="header-left">
+        <span id="room-label">room: <span id="room-name"></span></span>
+        <span id="peer-count">peers: <span id="peer-count-num">0</span></span>
+        <span id="unread-badge" class="hidden" style="background:var(--red);color:var(--bg);padding:1px 6px;border-radius:2px;font-size:0.6rem">0</span>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-small" onclick="toggleSearch()" title="search">[ search ]</button>
+        <button class="btn btn-small" onclick="showUserList()" title="users">[ users ]</button>
+        <button class="btn btn-small" onclick="exportChat()" title="export">[ export ]</button>
+        <button class="btn btn-small" onclick="toggleStealth()" title="stealth">[ stealth ]</button>
+        <button class="btn btn-small" onclick="showSettings()">[ settings ]</button>
+        <button class="btn btn-small btn-danger" onclick="leaveRoom()">[ leave ]</button>
+      </div>
     </div>
+
+    <div id="search-bar" class="hidden" style="padding:6px 12px;background:var(--bg3);display:flex;gap:6px">
+      <input type="text" id="search-input" placeholder="search messages..." style="flex:1;padding:6px 10px;background:var(--bg);border:1px solid var(--border);color:var(--green);font-family:inherit;font-size:0.75rem;outline:none" oninput="searchMessages(this.value)">
+      <button class="btn btn-small" onclick="toggleSearch()">[ close ]</button>
+    </div>
+
     <div id="messages"></div>
+    <div id="typing-indicator" class="hidden"></div>
+
+    <div id="reply-bar" class="hidden" style="padding:4px 12px;background:var(--bg3);font-size:0.7rem;color:var(--text-dim);display:flex;align-items:center;gap:8px">
+      <span id="reply-preview" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button class="btn btn-small" onclick="cancelReply()">[ x ]</button>
+    </div>
+
     <div id="chat-input-area">
+      <button class="icon-btn" onclick="attachFile()" title="attach">[ + ]</button>
+      <select id="destruct-select" style="background:var(--bg2);color:var(--green-dim);border:1px solid var(--border);font-family:inherit;font-size:0.65rem;padding:4px" onchange="setDestructTimer(this.value)">
+        <option value="0">off</option><option value="5">5s</option><option value="10">10s</option>
+        <option value="30">30s</option><option value="60">1m</option><option value="300">5m</option>
+      </select>
+      <button class="icon-btn" onclick="toggleEmojiPicker()" title="emoji">[ : ) ]</button>
       <input type="text" id="chat-input" placeholder="type your message..." autocomplete="off">
+      <button id="btn-ptt" class="icon-btn" onmousedown="startVoiceStream()" onmouseup="stopVoiceStream()" ontouchstart="startVoiceStream()" ontouchend="stopVoiceStream()" title="hold to talk">[ mic ]</button>
       <button id="btn-send" onclick="sendMessage()">[ send ]</button>
     </div>
+
+    <div id="emoji-picker" class="hidden" style="padding:8px 12px;background:var(--bg3);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;max-height:120px;overflow-y:auto">
+    </div>
+  </div>
+
+  <div id="calculator" class="hidden" style="height:100dvh;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;width:100%;max-width:280px">
+      <div id="calc-display" style="background:var(--bg);padding:16px;text-align:right;font-size:2rem;color:var(--green);font-family:monospace;margin-bottom:12px;border:1px solid var(--border);overflow:hidden">0</div>
+      <div class="calc-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        <button class="btn" onclick="calcInput('7')">7</button><button class="btn" onclick="calcInput('8')">8</button><button class="btn" onclick="calcInput('9')">9</button><button class="btn btn-danger" onclick="calcOp('/')">/</button>
+        <button class="btn" onclick="calcInput('4')">4</button><button class="btn" onclick="calcInput('5')">5</button><button class="btn" onclick="calcInput('6')">6</button><button class="btn btn-danger" onclick="calcOp('*')">*</button>
+        <button class="btn" onclick="calcInput('1')">1</button><button class="btn" onclick="calcInput('2')">2</button><button class="btn" onclick="calcInput('3')">3</button><button class="btn btn-danger" onclick="calcOp('-')">-</button>
+        <button class="btn" onclick="calcInput('0')">0</button><button class="btn" onclick="calcInput('.')">.</button><button class="btn btn-secondary" onclick="calcResult()">=</button><button class="btn btn-danger" onclick="calcOp('+')">+</button>
+        <button class="btn btn-danger" onclick="calcClear()" style="grid-column:span 4">C</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settings-panel" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>[ settings ]</h2>
+      <div class="setting-row"><label>display name</label><input type="text" id="username-input" maxlength="20"><button class="btn btn-small" onclick="saveUsername()">[ save ]</button></div>
+      <div class="setting-row"><label>theme</label><button class="btn btn-small" onclick="toggleTheme()">[ toggle ]</button></div>
+      <div class="setting-row"><label>font size</label><select id="font-size-select" onchange="setFontSize(this.value)" style="background:var(--bg);color:var(--green);border:1px solid var(--border);font-family:inherit;font-size:0.7rem;padding:4px"><option value="small">small</option><option value="medium" selected>medium</option><option value="large">large</option></select></div>
+      <div class="setting-row"><label>sound</label><button class="btn btn-small" onclick="toggleSound()" id="sound-btn">[ on ]</button></div>
+      <div class="setting-row"><label>vibrate</label><button class="btn btn-small" onclick="toggleVibrate()" id="vibrate-btn">[ on ]</button></div>
+      <div class="setting-row"><label>discovery</label><button class="btn btn-small" onclick="showBleScan()">[ ble ]</button><button class="btn btn-small" onclick="showQrScan()">[ qr ]</button></div>
+      <div class="setting-row"><label>clear history</label><button class="btn btn-small btn-danger" onclick="clearHistory()">[ clear ]</button></div>
+      <div class="setting-row"><label>export chat</label><button class="btn btn-small" onclick="exportChat()">[ export ]</button></div>
+      <button class="btn btn-small" onclick="closeSettings()" style="margin-top:8px;width:100%">[ close ]</button>
+    </div>
+  </div>
+
+  <div id="qr-scanner" class="overlay hidden">
+    <div class="overlay-content"><h2>[ scan qr code ]</h2><div id="qr-reader"></div><p id="qr-result" class="text-dim"></p><button class="btn btn-small" onclick="closeQrScan()">[ close ]</button></div>
+  </div>
+
+  <div id="ble-scanner" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>[ ble proximity scan ]</h2>
+      <p class="text-dim">scanning for nearby Ghost Chat devices...</p>
+      <div id="ble-devices"><p class="text-dim">no devices found</p></div>
+      <div class="btn-group"><button class="btn btn-small" onclick="startBleScan()">[ start scan ]</button><button class="btn btn-small" onclick="closeBleScan()">[ close ]</button></div>
+    </div>
+  </div>
+
+  <div id="file-share" class="overlay hidden">
+    <div class="overlay-content"><h2>[ share file ]</h2><input type="file" id="file-input" onchange="sendFile(event)"><button class="btn btn-small" onclick="closeFileShare()">[ close ]</button></div>
+  </div>
+
+  <div id="user-list" class="overlay hidden">
+    <div class="overlay-content"><h2>[ connected users ]</h2><div id="user-list-content"><p class="text-dim">no users</p></div><button class="btn btn-small" onclick="closeUserList()">[ close ]</button></div>
   </div>
 </div>
 
 <div id="toast" class="hidden"></div>
 
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
