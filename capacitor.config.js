@@ -1,6 +1,4 @@
-import { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'com.ghostchat.app',
   appName: 'Ghost Chat',
   webDir: 'www',
@@ -12,10 +10,8 @@ const config: CapacitorConfig = {
     allowMixedContent: true
   },
   plugins: {
-    Clipboard: {
-      enabled: true
-    }
+    Clipboard: { enabled: true }
   }
 };
 
-export default config;
+module.exports = config;
