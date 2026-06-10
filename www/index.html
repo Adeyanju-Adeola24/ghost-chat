@@ -3,256 +3,345 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#1f2c33">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Ghost Chat</title>
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div id="app">
-  <!-- LANDING -->
-  <div id="landing" class="screen">
+  <!-- ═══ LANDING: Create / Join Room ═══ -->
+  <div id="screen-landing" class="screen">
     <div class="landing-header">
-      <div class="brand">
+      <div class="brand-row">
         <div class="brand-icon">&#x1F47B;</div>
-        <h1>Ghost Chat</h1>
-      </div>
-      <p class="brand-sub">anonymous · encrypted · P2P</p>
-    </div>
-
-    <div class="landing-card">
-      <div class="tab-bar">
-        <button class="tab active" onclick="switchLandingTab('join')" id="tab-join">Join</button>
-        <button class="tab" onclick="switchLandingTab('create')" id="tab-create">Create</button>
-      </div>
-
-      <div id="landing-join">
-        <div class="input-group">
-          <label>Room code</label>
-          <input type="text" id="room-input" placeholder="e.g. XK4M9P" maxlength="10" autocomplete="off">
+        <div>
+          <h1 class="brand-name">Ghost Chat</h1>
+          <p class="brand-tag">anonymous &bull; encrypted &bull; P2P</p>
         </div>
-        <div class="input-group">
-          <label>Password <span class="opt">(optional)</span></label>
-          <input type="password" id="room-password" placeholder="leave blank for none" maxlength="20" autocomplete="off">
-        </div>
-        <button class="btn-primary btn-block" onclick="joinRoom()">
-          <span class="btn-icon">&#x1F50A;</span> Join Room
-        </button>
-      </div>
-
-      <div id="landing-create" class="hidden">
-        <div class="input-group">
-          <label>Room name <span class="opt">(optional)</span></label>
-          <input type="text" id="room-name-input" placeholder="e.g. Ghost Squad" maxlength="20">
-        </div>
-        <div class="input-group">
-          <label>Password <span class="opt">(optional)</span></label>
-          <input type="password" id="create-password" placeholder="protect your room" maxlength="20">
-        </div>
-        <button class="btn-primary btn-block" onclick="createRoom()">
-          <span class="btn-icon">&#x1F680;</span> Create Room
-        </button>
-      </div>
-
-      <div class="divider"><span>or</span></div>
-
-      <div class="alt-actions">
-        <button class="btn-alt" onclick="showQrScan()"><span>&#x1F4F7;</span> Scan QR</button>
-        <button class="btn-alt" onclick="showBleScan()"><span>&#x1F9F0;</span> BLE Nearby</button>
-      </div>
-
-      <div id="room-display" class="hidden">
-        <div class="divider"><span>your room</span></div>
-        <div class="room-code-card">
-          <div id="room-code" class="room-code-lg"></div>
-          <button class="btn-secondary btn-sm" onclick="copyRoomCode()">&#x1F4CB; Copy Code</button>
-        </div>
-        <div id="qr-container" class="hidden"></div>
-        <p id="room-pw-notice" class="hidden pw-notice">&#x1F512; Password protected</p>
       </div>
     </div>
+    <div class="landing-body">
+      <div class="landing-card">
+        <div class="tab-bar landing-tabs">
+          <button class="tab active" id="ltab-join" onclick="switchLandingTab('join')">Join</button>
+          <button class="tab" id="ltab-create" onclick="switchLandingTab('create')">Create</button>
+        </div>
 
-    <div class="landing-footer">
-      <div class="theme-toggle" onclick="toggleTheme()">
-        <span id="theme-icon">&#x1F319;</span>
+        <div id="landing-join">
+          <div class="field">
+            <label>Room code</label>
+            <input type="text" id="room-input" placeholder="e.g. XK4M9P" maxlength="10" autocomplete="off">
+          </div>
+          <div class="field">
+            <label>Password <span class="opt">optional</span></label>
+            <input type="password" id="room-password" placeholder="leave blank" maxlength="20" autocomplete="off">
+          </div>
+          <button class="btn-primary btn-block" onclick="joinRoom()">&#x1F50A; Join Room</button>
+        </div>
+
+        <div id="landing-create" class="hidden">
+          <div class="field">
+            <label>Room name</label>
+            <input type="text" id="room-name-input" placeholder="e.g. Secret Chat" maxlength="30">
+          </div>
+          <div class="field">
+            <label>Password <span class="opt">optional</span></label>
+            <input type="password" id="create-password" placeholder="protect your room" maxlength="20">
+          </div>
+          <button class="btn-primary btn-block" onclick="createRoom()">&#x1F680; Create Room</button>
+        </div>
+
+        <div class="divider"><span>or connect</span></div>
+
+        <div class="alt-row">
+          <button class="btn-alt" onclick="showQrScan()"><span>&#x1F4F7;</span> Scan QR</button>
+          <button class="btn-alt" onclick="showBleScan()"><span>&#x1F9F0;</span> BLE Nearby</button>
+        </div>
+
+        <div id="room-display" class="hidden">
+          <div class="divider"><span>your room</span></div>
+          <div class="code-card">
+            <div id="room-code" class="code-lg"></div>
+            <div class="code-actions">
+              <button class="btn-secondary btn-sm" onclick="copyRoomCode()">&#x1F4CB; Copy</button>
+              <button class="btn-secondary btn-sm" onclick="saveCurrentRoomAsContact()">&#x1F464; Save</button>
+            </div>
+          </div>
+          <div id="qr-container" class="qr-wrap"></div>
+          <p id="room-pw-notice" class="pw-badge hidden">&#x1F512; Password protected</p>
+        </div>
+
+        <div class="landing-footer">
+          <span class="net-badge" id="net-badge">&#x1F310; Cloud</span>
+          <span class="sep">&bull;</span>
+          <span class="status-text" id="status-text">Ready</span>
+        </div>
       </div>
-      <div class="status-dot" id="status-dot"></div>
-      <span id="connection-status-text">Ready</span>
-      <span id="network-mode" class="network-badge">&#x1F310; Cloud</span>
+    </div>
+    <div class="landing-skip" onclick="goHome()">
+      <span>&#x2190; Back to chats</span>
     </div>
   </div>
 
-  <!-- CHAT -->
-  <div id="chat" class="screen hidden">
-    <div class="chat-header">
-      <div class="chat-header-left" onclick="leaveRoom()">
-        <span class="back-btn">&#x2190;</span>
-        <div class="avatar" id="chat-avatar">&#x1F47B;</div>
-        <div class="chat-header-info">
-          <div class="chat-room-name" id="chat-room-name">Room</div>
-          <div class="chat-room-status" id="chat-room-status">connecting...</div>
-        </div>
+  <!-- ═══ HOME: Chats + Contacts ═══ -->
+  <div id="screen-home" class="screen">
+    <div class="home-header">
+      <div class="home-brand">
+        <div class="home-icon">&#x1F47B;</div>
+        <h1>Ghost Chat</h1>
       </div>
-      <div class="chat-header-right">
-        <button class="header-btn" onclick="toggleSearch()" title="Search">&#x1F50D;</button>
-        <button class="header-btn" onclick="showUserList()" title="Users">&#x1F465;</button>
+      <div class="home-actions">
+        <button class="header-btn" onclick="goLanding()" title="New chat">&#x1F4AD;</button>
         <button class="header-btn" onclick="showSettings()" title="Settings">&#x22EE;</button>
       </div>
     </div>
 
-    <div id="search-bar" class="hidden">
-      <input type="text" id="search-input" placeholder="Search messages..." oninput="searchMessages(this.value)">
-      <button class="btn-sm" onclick="toggleSearch()">Cancel</button>
+    <div class="home-tabs">
+      <button class="home-tab active" id="tab-chats" onclick="switchHomeTab('chats')">
+        <span class="tab-icon">&#x1F4AC;</span> Chats
+        <span id="total-unread" class="unread-dot hidden"></span>
+      </button>
+      <button class="home-tab" id="tab-contacts" onclick="switchHomeTab('contacts')">
+        <span class="tab-icon">&#x1F465;</span> Contacts
+      </button>
     </div>
 
-    <div id="messages" class="chat-messages"></div>
+    <div id="content-chats" class="tab-content">
+      <div id="chats-list" class="list-container">
+        <div id="chats-empty" class="empty-state">
+          <div class="empty-icon">&#x1F4AC;</div>
+          <p>No conversations yet</p>
+          <p class="empty-sub">Create or join a room to start chatting</p>
+          <button class="btn-primary" onclick="goLanding()">&#x1F4AD; New Chat</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="content-contacts" class="tab-content hidden">
+      <div id="contacts-list" class="list-container">
+        <div id="contacts-empty" class="empty-state">
+          <div class="empty-icon">&#x1F464;</div>
+          <p>No contacts saved</p>
+          <p class="empty-sub">Save room codes as contacts for quick access</p>
+          <button class="btn-primary" onclick="showAddContact()">&#x2795; Add Contact</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CHAT SCREEN ═══ -->
+  <div id="screen-chat" class="screen hidden">
+    <div class="chat-header">
+      <div class="chat-header-left" onclick="goHome()">
+        <button class="header-btn back-btn">&#x2190;</button>
+        <div class="chat-avatar" id="chat-avatar">&#x1F47B;</div>
+        <div class="chat-info">
+          <div class="chat-title" id="chat-title">Room</div>
+          <div class="chat-sub" id="chat-sub">connecting...</div>
+        </div>
+      </div>
+      <div class="chat-header-right">
+        <button class="header-btn" onclick="showChatInfo()" title="Info">&#x2139;</button>
+      </div>
+    </div>
+
+    <div id="search-bar" class="search-bar hidden">
+      <input type="text" id="search-input" placeholder="Search..." oninput="searchMessages(this.value)">
+      <button class="btn-sm" onclick="closeSearch()">Cancel</button>
+    </div>
+
+    <div id="messages" class="chat-msgs"></div>
 
     <div id="typing-indicator" class="hidden typing-indicator">
       <span class="typing-dots"><span></span><span></span><span></span></span>
-      <span id="typing-text">someone is typing...</span>
+      <span id="typing-text">typing...</span>
     </div>
 
     <div id="reply-bar" class="hidden reply-bar">
       <div class="reply-line"></div>
-      <div class="reply-content">
-        <span class="reply-label">Replying to</span>
+      <div class="reply-body">
+        <span class="reply-label">Replying</span>
         <span id="reply-preview"></span>
       </div>
       <button class="btn-sm" onclick="cancelReply()">&times;</button>
     </div>
 
-    <div class="chat-input-area">
-      <button class="input-btn" onclick="toggleEmojiPicker()" title="Emoji">&#x1F600;</button>
-      <button class="input-btn" onclick="attachFile()" title="Attach">&#x1F4CE;</button>
-      <div class="input-wrapper">
-        <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
-        <button class="input-btn destruct-btn" id="destruct-toggle" onclick="toggleDestruct()" title="Self-destruct">&#x1F4A5;</button>
+    <div class="chat-input-row">
+      <button class="chat-btn" onclick="toggleEmojiPicker()">&#x1F600;</button>
+      <button class="chat-btn" onclick="attachFile()">&#x1F4CE;</button>
+      <div class="input-wrap">
+        <input type="text" id="chat-input" placeholder="Type a message" autocomplete="off">
+        <button class="chat-btn destruct-btn" id="destruct-btn" onclick="toggleDestruct()" title="Self-destruct">&#x1F4A5;</button>
       </div>
-      <button class="input-btn" id="btn-ptt" onmousedown="startVoiceStream()" onmouseup="stopVoiceStream()" ontouchstart="startVoiceStream()" ontouchend="stopVoiceStream()" title="Hold to talk">&#x1F3A4;</button>
-      <button class="send-btn" id="btn-send" onclick="sendMessage()">
-        <span>&#x27A4;</span>
-      </button>
+      <button class="chat-btn" id="ptt-btn" onmousedown="startVoiceStream()" onmouseup="stopVoiceStream()" ontouchstart="startVoiceStream()" ontouchend="stopVoiceStream()" title="Hold to talk">&#x1F3A4;</button>
+      <button class="send-btn" id="btn-send" onclick="sendMessage()">&#x27A4;</button>
     </div>
 
-    <div id="emoji-picker" class="hidden emoji-picker"></div>
+    <div id="emoji-picker" class="emoji-grid hidden"></div>
   </div>
 
-  <!-- CALCULATOR STEALTH -->
-  <div id="calculator" class="screen hidden">
-    <div class="calc-container">
-      <div class="calc-header">
-        <div class="calc-toggle" onclick="toggleStealth()">&#x1F47B;</div>
-        <span>Calculator</span>
-      </div>
-      <div id="calc-display" class="calc-display">0</div>
-      <div class="calc-grid">
-        <button class="calc-btn calc-op" onclick="calcOp('/')">&divide;</button>
-        <button class="calc-btn calc-op" onclick="calcOp('*')">&times;</button>
-        <button class="calc-btn calc-op" onclick="calcOp('-')">&minus;</button>
-        <button class="calc-btn calc-op" onclick="calcOp('+')">+</button>
-        <button class="calc-btn" onclick="calcInput('7')">7</button>
-        <button class="calc-btn" onclick="calcInput('8')">8</button>
-        <button class="calc-btn" onclick="calcInput('9')">9</button>
-        <button class="calc-btn calc-op" onclick="calcClear()">C</button>
-        <button class="calc-btn" onclick="calcInput('4')">4</button>
-        <button class="calc-btn" onclick="calcInput('5')">5</button>
-        <button class="calc-btn" onclick="calcInput('6')">6</button>
-        <button class="calc-btn calc-eq" onclick="calcResult()">=</button>
-        <button class="calc-btn" onclick="calcInput('1')">1</button>
-        <button class="calc-btn" onclick="calcInput('2')">2</button>
-        <button class="calc-btn" onclick="calcInput('3')">3</button>
-        <button class="calc-btn calc-zero" onclick="calcInput('0')">0</button>
-        <button class="calc-btn" onclick="calcInput('.')">.</button>
-      </div>
-    </div>
-  </div>
+  <!-- ═══ OVERLAYS ═══ -->
 
-  <!-- OVERLAYS -->
-  <div id="settings-panel" class="overlay hidden">
-    <div class="overlay-sheet">
-      <div class="overlay-handle"></div>
-      <h2>Settings</h2>
-      <div class="settings-list">
-        <div class="setting-item">
-          <div class="setting-label">Display Name</div>
-          <div class="setting-control"><input type="text" id="username-input" maxlength="20"><button class="btn-sm" onclick="saveUsername()">Save</button></div>
+  <!-- Settings -->
+  <div id="overlay-settings" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Settings</h2>
+      <div class="sheet-body">
+        <div class="setting-row">
+          <span>Display Name</span>
+          <div class="set-control"><input type="text" id="username-input" maxlength="20"><button class="btn-sm" onclick="saveUsername()">Save</button></div>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Theme</div>
-          <div class="setting-control"><button class="btn-sm" onclick="toggleTheme()" id="theme-btn-toggle">Dark / Light</button></div>
+        <div class="setting-row">
+          <span>Theme</span>
+          <button class="btn-sm" onclick="toggleTheme()" id="theme-btn-label">Dark / Light</button>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Font Size</div>
-          <div class="setting-control"><select id="font-size-select" onchange="setFontSize(this.value)"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></div>
+        <div class="setting-row">
+          <span>Font Size</span>
+          <select id="font-select" onchange="setFontSize(this.value)"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Sound</div>
-          <div class="setting-control"><label class="toggle"><input type="checkbox" id="sound-check" onchange="toggleSound()"><span class="slider"></span></label></div>
+        <div class="setting-row">
+          <span>Sound</span>
+          <label class="tg"><input type="checkbox" id="sound-cb" onchange="toggleSound()"><span class="tg-slider"></span></label>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Vibrate</div>
-          <div class="setting-control"><label class="toggle"><input type="checkbox" id="vibrate-check" onchange="toggleVibrate()"><span class="slider"></span></label></div>
+        <div class="setting-row">
+          <span>Vibrate</span>
+          <label class="tg"><input type="checkbox" id="vibrate-cb" onchange="toggleVibrate()"><span class="tg-slider"></span></label>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Share Location</div>
-          <div class="setting-control"><button class="btn-sm" onclick="shareLocation()">Send GPS</button></div>
+        <div class="setting-row">
+          <span>Share Location</span>
+          <button class="btn-sm" onclick="shareLocation()">Send GPS</button>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Stealth Mode</div>
-          <div class="setting-control"><button class="btn-sm" onclick="toggleStealth()">Open Calc</button></div>
+        <div class="setting-row">
+          <span>Stealth Mode</span>
+          <button class="btn-sm" onclick="toggleStealth()">Open Calc</button>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Export Chat</div>
-          <div class="setting-control"><button class="btn-sm" onclick="exportChat()">Export</button></div>
+        <div class="setting-row">
+          <span>Export Chat</span>
+          <button class="btn-sm" onclick="exportChat()">Export</button>
         </div>
-        <div class="setting-item">
-          <div class="setting-label">Clear History</div>
-          <div class="setting-control"><button class="btn-sm btn-danger" onclick="clearHistory()">Clear</button></div>
+        <div class="setting-row">
+          <span>Clear History</span>
+          <button class="btn-sm btn-danger" onclick="clearHistory()">Clear</button>
         </div>
       </div>
       <button class="btn-secondary btn-block" onclick="closeSettings()">Close</button>
     </div>
   </div>
 
-  <div id="qr-scanner" class="overlay hidden">
-    <div class="overlay-sheet">
-      <div class="overlay-handle"></div>
-      <h2>Scan QR Code</h2>
-      <div id="qr-reader"></div>
-      <p id="qr-result" class="qr-result-text"></p>
+  <!-- Add Contact -->
+  <div id="overlay-add-contact" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Add Contact</h2>
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="contact-name-input" placeholder="e.g. Alice" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Room Code</label>
+        <input type="text" id="contact-code-input" placeholder="e.g. XK4M9P" maxlength="10" style="text-transform:uppercase;letter-spacing:3px">
+      </div>
+      <button class="btn-primary btn-block" onclick="saveContact()">&#x1F464; Save Contact</button>
+      <button class="btn-secondary btn-block" onclick="closeAddContact()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- User List -->
+  <div id="overlay-users" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Connected Users</h2>
+      <div id="users-content"></div>
+      <button class="btn-secondary btn-block" onclick="closeUserList()">Close</button>
+    </div>
+  </div>
+
+  <!-- QR Scanner -->
+  <div id="overlay-qr" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Scan QR Code</h2>
+      <div id="qr-reader" class="qr-reader-wrap"></div>
+      <p id="qr-result-text" class="qr-result"></p>
       <button class="btn-secondary btn-block" onclick="closeQrScan()">Cancel</button>
     </div>
   </div>
 
-  <div id="ble-scanner" class="overlay hidden">
-    <div class="overlay-sheet">
-      <div class="overlay-handle"></div>
-      <h2>BLE Nearby</h2>
-      <p class="hint">Discover Ghost Chat devices nearby</p>
-      <div id="ble-devices">
-        <p class="hint">Scanning...</p>
-      </div>
+  <!-- BLE -->
+  <div id="overlay-ble" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">BLE Nearby</h2>
+      <p class="sheet-hint">Discover nearby Ghost Chat devices</p>
+      <div id="ble-list"></div>
       <button class="btn-secondary btn-block" onclick="startBleScan()">Scan</button>
-      <button class="btn-secondary btn-block" onclick="closeBleScan()">Cancel</button>
+      <button class="btn-secondary btn-block" onclick="closeBleScan()">Close</button>
     </div>
   </div>
 
-  <div id="file-share" class="overlay hidden">
-    <div class="overlay-sheet">
-      <div class="overlay-handle"></div>
-      <h2>Send File</h2>
+  <!-- File Share -->
+  <div id="overlay-file" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Send File</h2>
       <input type="file" id="file-input" onchange="sendFile(event)">
       <button class="btn-secondary btn-block" onclick="closeFileShare()">Cancel</button>
     </div>
   </div>
 
-  <div id="user-list" class="overlay hidden">
-    <div class="overlay-sheet">
-      <div class="overlay-handle"></div>
-      <h2>Connected Users</h2>
-      <div id="user-list-content"></div>
-      <button class="btn-secondary btn-block" onclick="closeUserList()">Close</button>
+  <!-- Chat Info -->
+  <div id="overlay-chat-info" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Room Info</h2>
+      <div class="info-grid">
+        <div><span class="info-label">Code</span><span id="info-code" class="info-val"></span></div>
+        <div><span class="info-label">Name</span><span id="info-name" class="info-val"></span></div>
+        <div><span class="info-label">Peers</span><span id="info-peers" class="info-val">0</span></div>
+        <div><span class="info-label">Password</span><span id="info-pw" class="info-val">No</span></div>
+      </div>
+      <div class="info-actions">
+        <button class="btn-sm" onclick="showUserList()">&#x1F465; Users</button>
+        <button class="btn-sm" onclick="toggleSearch()">&#x1F50D; Search</button>
+        <button class="btn-sm" onclick="exportChat()">&#x1F4E4; Export</button>
+        <button class="btn-sm btn-danger" onclick="clearHistory()">&#x1F5D1; Clear</button>
+      </div>
+      <button class="btn-secondary btn-block" onclick="closeChatInfo()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEALTH CALC ═══ -->
+<div id="screen-calc" class="screen hidden">
+  <div class="calc-wrap">
+    <div class="calc-top">
+      <button class="calc-ghost" onclick="toggleStealth()">&#x1F47B;</button>
+      <span>Calculator</span>
+    </div>
+    <div id="calc-display" class="calc-screen">0</div>
+    <div class="calc-btns">
+      <button class="cbtn cbtn-op" onclick="calcOp('/')">&divide;</button>
+      <button class="cbtn cbtn-op" onclick="calcOp('*')">&times;</button>
+      <button class="cbtn cbtn-op" onclick="calcOp('-')">&minus;</button>
+      <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
+      <button class="cbtn" onclick="calcInput('7')">7</button>
+      <button class="cbtn" onclick="calcInput('8')">8</button>
+      <button class="cbtn" onclick="calcInput('9')">9</button>
+      <button class="cbtn cbtn-clear" onclick="calcClear()">C</button>
+      <button class="cbtn" onclick="calcInput('4')">4</button>
+      <button class="cbtn" onclick="calcInput('5')">5</button>
+      <button class="cbtn" onclick="calcInput('6')">6</button>
+      <button class="cbtn cbtn-eq" onclick="calcResult()">=</button>
+      <button class="cbtn" onclick="calcInput('1')">1</button>
+      <button class="cbtn" onclick="calcInput('2')">2</button>
+      <button class="cbtn" onclick="calcInput('3')">3</button>
+      <button class="cbtn cbtn-wide" onclick="calcInput('0')">0</button>
+      <button class="cbtn" onclick="calcInput('.')">.</button>
     </div>
   </div>
 </div>
